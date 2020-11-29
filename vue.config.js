@@ -1,5 +1,8 @@
 // 该配置会和公共配置合并
 module.exports = {
+  devServer: {
+    disableHostCheck: true
+  },
   configureWebpack: {
     resolve: {
       // 配置别名
