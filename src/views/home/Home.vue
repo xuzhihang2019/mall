@@ -86,7 +86,7 @@
       const refresh = debounce(this.$refs.scroll.refresh, 200)
 
       // 监听item中图片加载完成
-      this.$bus.$on('itemImageLoad', () => {
+      this.$bus.$on('homeItemImageLoad', () => {
         // this.$refs.scroll.refresh()
         // 使用防抖函数处理，会回调执行timer中的this.$refs.scroll.refresh()
         // 如果200ms内又有新图片加载，timer就会被清空
@@ -146,8 +146,10 @@
             this.currentType = 'sell';
             break;
         }
-        this.$refs.tabControl1.currentIndex = index;
+        if(this.$refs.tabControl1 !== undefined){
+          this.$refs.tabControl1.currentIndex = index;
         this.$refs.tabControl2.currentIndex = index;
+        }
       },
       backClick() {
         this.$refs.scroll.scrollTo(0, 0)
