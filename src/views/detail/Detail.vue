@@ -6,13 +6,15 @@
       <detail-base-info :goods="goods"></detail-base-info>
       <detail-shop-info :shop="shop"></detail-shop-info>
       <detail-goods-info :detail-info="detailInfo" @imageLoad="imageLoad"></detail-goods-info>
-      <detail-param-info ref="params" :param-info="paramInfo"></detail-param-info>
+      <detail-param-info ref="param" :param-info="paramInfo"></detail-param-info>
       <detail-comment-info ref="comment" :comment-info="commentInfo"></detail-comment-info>
       <goods-list ref="recommend" :goods="recommendList"></goods-list>
     </scroll>
     <detail-bottom-bar @addCart="addToCart"></detail-bottom-bar>
 
     <back-top @click.native="backClick" v-show="isShowBackTop"></back-top>
+
+    <!-- <toast :message="message" :is-show="isShowToast"></toast> -->
   </div>
 </template>
 
@@ -29,6 +31,7 @@
   import Scroll from 'components/common/scroll/Scroll'
   import BackTop from 'components/content/backTop/BackTop'
   import GoodsList from 'components/content/goods/GoodsList'
+  // import Toast from 'components/common/toast/Toast'
 
   import {getDetail, getRecommend, Goods, Shop, GoodsParam} from 'network/detail.js'
   import { debounce } from 'common/utils.js'
@@ -47,6 +50,7 @@
       Scroll,
       BackTop,
       GoodsList
+      // Toast
     },
     data() {
       return {
@@ -61,7 +65,9 @@
         themeTopYs: [],
         getThemeTopY: null,
         currentIndex: 0,
-        isShowBackTop: false,
+        isShowBackTop: false
+        // message: '',
+        // isShowToast: false
       }
     },
     created() {
@@ -102,7 +108,7 @@
       this.getThemeTopY = debounce(() => {
         this.themeTopYs = []
         this.themeTopYs.push(0)
-        this.themeTopYs.push(this.$refs.params.$el.offsetTop)
+        this.themeTopYs.push(this.$refs.param.$el.offsetTop)
         this.themeTopYs.push(this.$refs.comment.$el.offsetTop)
         this.themeTopYs.push(this.$refs.recommend.$el.offsetTop)
       }, 1000)
@@ -158,7 +164,21 @@
         product.price = this.goods.realPrice
         product.iid = this.iid
 
-        this.$store.dispatch('addCart', product)
+        this.$store.dispatch('addCart', product).then(res => {
+          console.log(res)
+          // this.message = res
+          // this.isShowToast = true
+
+          // setTimeout(() => {
+          //   this.message = ''
+          //   this.isShowToast = false
+          // }, 1500);
+
+          // 将toast封装成插件使用
+          this.$toast.show(res, 2000)
+        })
+
+
       }
     }
   }
@@ -180,5 +200,17 @@
     position: relative;
     z-index: 9;
     background-color: #fff;
+  }
+  .item-info {
+    font-size: 17px;
+    color: #333;
+    padding: 5px 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .item-info .item-desc {
+    font-size: 14px;
+    color: #666;
+    margin-top: 15px;
   }
 </style>
