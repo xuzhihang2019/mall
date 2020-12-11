@@ -5,6 +5,7 @@ export default {
     payLoad.count++
   },
   [ADD_TO_CART](state, payLoad) {
+    payLoad.checked = false
     state.cartList.push(payLoad)
   }
 }
