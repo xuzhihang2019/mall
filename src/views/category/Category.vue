@@ -1,140 +1,128 @@
 <template>
-  <div class="wrapper">分类
-    <ul class="content">
-      <li>1111111</li>
-      <li>1111112</li>
-      <li>1111113</li>
-      <li>1111114</li>
-      <li>1111115</li>
-      <li>1111116</li>
-      <li>1111117</li>
-      <li>1111118</li>
-      <li>1111119</li>
-      <li>11111110</li>
-      <li>11111111</li>
-      <li>11111112</li>
-      <li>11111113</li>
-      <li>11111114</li>
-      <li>11111115</li>
-      <li>11111116</li>
-      <li>11111117</li>
-      <li>11111118</li>
-      <li>11111119</li>
-      <li>11111120</li>
-      <li>11111121</li>
-      <li>11111122</li>
-      <li>11111123</li>
-      <li>11111124</li>
-      <li>11111125</li>
-      <li>11111126</li>
-      <li>11111127</li>
-      <li>11111128</li>
-      <li>11111129</li>
-      <li>11111130</li>
-      <li>11111131</li>
-      <li>11111132</li>
-      <li>11111133</li>
-      <li>11111134</li>
-      <li>11111135</li>
-      <li>11111136</li>
-      <li>11111137</li>
-      <li>11111138</li>
-      <li>11111139</li>
-      <li>11111140</li>
-      <li>11111141</li>
-      <li>11111142</li>
-      <li>11111143</li>
-      <li>11111144</li>
-      <li>11111145</li>
-      <li>11111146</li>
-      <li>11111147</li>
-      <li>11111148</li>
-      <li>11111149</li>
-      <li>11111150</li>
-      <li>11111151</li>
-      <li>11111152</li>
-      <li>11111153</li>
-      <li>11111154</li>
-      <li>11111155</li>
-      <li>11111156</li>
-      <li>11111157</li>
-      <li>11111158</li>
-      <li>11111159</li>
-      <li>11111160</li>
-      <li>11111161</li>
-      <li>11111162</li>
-      <li>11111163</li>
-      <li>11111164</li>
-      <li>11111165</li>
-      <li>11111166</li>
-      <li>11111167</li>
-      <li>11111168</li>
-      <li>11111169</li>
-      <li>11111170</li>
-      <li>11111171</li>
-      <li>11111172</li>
-      <li>11111173</li>
-      <li>11111174</li>
-      <li>11111175</li>
-      <li>11111176</li>
-      <li>11111177</li>
-      <li>11111178</li>
-      <li>11111179</li>
-      <li>11111180</li>
-      <li>11111181</li>
-      <li>11111182</li>
-      <li>11111183</li>
-      <li>11111184</li>
-      <li>11111185</li>
-      <li>11111186</li>
-      <li>11111187</li>
-      <li>11111188</li>
-      <li>11111189</li>
-      <li>11111190</li>
-      <li>11111191</li>
-      <li>11111192</li>
-      <li>11111193</li>
-      <li>11111194</li>
-      <li>11111195</li>
-      <li>11111196</li>
-      <li>11111197</li>
-      <li>11111198</li>
-      <li>11111199</li>
-      <li>111111100</li>
-    </ul>
+  <div id="category">
+    <nav-bar class="nav-bar">
+      <div slot="center">商品分类</div>
+    </nav-bar>
+    <div class="content">
+      <tab-menu :categories="categories" @selectItem="selectItem"></tab-menu>
+
+      <scroll id="tab-content" :data="[categoryData]">
+        <div>
+          <tab-content-category :subcategories="showSubcategory"></tab-content-category>
+          <tab-content-detail :category-detail="showCategoryDetail"></tab-content-detail>
+        </div>
+      </scroll>
+    </div>
   </div>
 </template>
 
 <script>
-  import BScroll from 'better-scroll'
-
+  import NavBar from 'components/common/navbar/NavBar'
+  import TabMenu from './childComps/TabMenu'
+  import TabControl from 'components/content/tabControl/TabControl'
+  import Scroll from 'components/common/scroll/Scroll'
+  import TabContentCategory from './childComps/TabContentCategory'
+  import TabContentDetail from './childComps/TabContentDetail'
+  import {getCategory, getSubcategory, getCategoryDetail} from "network/category";
   export default {
-    name: "Category",
+		name: "Category",
+    components: {
+		  NavBar,
+      TabMenu,
+      TabControl,
+      Scroll,
+      TabContentCategory,
+      TabContentDetail
+    },
     data() {
-      return {
-        scroll: null
+		  return {
+		    categories: [],
+        categoryData: {
+        },
+        currentIndex: -1
       }
     },
-    mounted() {
-      this.scroll = new BScroll('.wrapper',{
-        probeType: 3,
-        pullUpLoad: true,
-        click: true
-      })
-
-      this.scroll.on('scroll', (position) => {
-        // console.log(position)
-      })
-
-      this.scroll.on('pullingUp', function () {
-        console.log('上拉加载')
-      })
+    created() {
+		  // 1.请求分类数据
+      this._getCategory()
+    },
+    computed: {
+		  showSubcategory() {
+		    if (this.currentIndex === -1) return {}
+        return this.categoryData[this.currentIndex].subcategories
+      },
+      showCategoryDetail() {
+		    if (this.currentIndex === -1) return []
+		    return this.categoryData[this.currentIndex].categoryDetail[this.currentType]
+      }
+    },
+    methods: {
+		  _getCategory() {
+		    getCategory().then(res => {
+		      // 1.获取分类数据
+		      this.categories = res.data.category.list
+          // 2.初始化每个类别的子数据
+          for (let i = 0; i < this.categories.length; i++) {
+            this.categoryData[i] = {
+              subcategories: {},
+              categoryDetail: {
+                'pop': [],
+                'new': [],
+                'sell': []
+              }
+            }
+          }
+          // 3.请求第一个分类的数据
+          this._getSubcategories(0)
+        })
+      },
+      _getSubcategories(index) {
+        this.currentIndex = index;
+		    const mailKey = this.categories[index].maitKey;
+        getSubcategory(mailKey).then(res => {
+          this.categoryData[index].subcategories = res.data
+          this.categoryData = {...this.categoryData}
+          this._getCategoryDetail('pop')
+          this._getCategoryDetail('sell')
+          this._getCategoryDetail('new')
+        })
+      },
+      _getCategoryDetail(type) {
+		    // 1.获取请求的miniWallkey
+        const miniWallkey = this.categories[this.currentIndex].miniWallkey;
+        // 2.发送请求,传入miniWallkey和type
+		    getCategoryDetail(miniWallkey, type).then(res => {
+		      // 3.将获取的数据保存下来
+		      this.categoryData[this.currentIndex].categoryDetail[type] = res
+          this.categoryData = {...this.categoryData}
+        })
+      },
+      selectItem(index) {
+        this._getSubcategories(index)
+      }
     }
-  }
+	}
 </script>
+
 <style scoped>
-  .wrapper {
-    height: 150px;
-    background-color: blue;
+  #category {
+    height: 100vh;
+  }
+  .nav-bar {
+    background-color: var(--color-tint);
+    font-weight: 700;
+    color: #fff;
+  }
+  .content {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 44px;
+    bottom: 49px;
+    display: flex;
+  }
+  #tab-content {
+    height: 100%;
+    flex: 1;
   }
 </style>
